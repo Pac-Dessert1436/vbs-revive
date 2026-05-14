@@ -33,11 +33,7 @@ Public NotInheritable Class AppMain
     End Sub
 
     Private Sub AppMain_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        Try
-            LoadGameScript()
-        Catch ex As Exception
-            MessageBox.Show($"Script error: {ex.Message}", "Error", MessageBoxButtons.OK)
-        End Try
+        LoadGameScript()  ' Exception already handled
         StartGameLoop()
     End Sub
 
@@ -46,7 +42,7 @@ Public NotInheritable Class AppMain
             If Not Directory.Exists(folder) Then
                 Directory.CreateDirectory(folder)
             End If
-        Next
+        Next folder
 
         If Not File.Exists("gamemain.vbs") OrElse
             String.IsNullOrWhiteSpace(File.ReadAllText("gamemain.vbs")) Then
@@ -166,9 +162,7 @@ End Sub
     End Sub
 
     Private Sub StartGameLoop()
-        _gameLoop = New System.Windows.Forms.Timer With {
-            .Interval = 16
-        }
+        _gameLoop = New System.Windows.Forms.Timer With {.Interval = 16}
         AddHandler _gameLoop.Tick, AddressOf GameLoop_Tick
         _gameLoop.Start()
     End Sub

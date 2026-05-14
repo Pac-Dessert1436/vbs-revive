@@ -52,11 +52,13 @@ Upon first run, the engine creates default asset directories (`sounds`, `images`
 
 ## Game Scripting API
 
+> **Note**: `!` at the end of a variable name means it is a `Single` type. For more details, see [Available APIs](#available-apis) section.
+
 Your game logic goes in `gamemain.vbs` with three main functions:
 
 - `Initialize()`: Called once at startup
-- `Update(dt)`: Called every frame for game logic, where `dt` is delta time in seconds since last frame
-- `Render(g, dt)`: Called every frame for drawing, where `g` is the Graphics object and `dt` is delta time in seconds since last frame
+- `Update(dt!)`: Called every frame for game logic, where `dt` is delta time in seconds since last frame
+- `Render(g As Graphics, dt!)`: Called every frame for drawing, where `g` is the Graphics object and `dt` is delta time in seconds since last frame
 
 ### Example Script
 ```vbscript
@@ -97,7 +99,6 @@ End Sub
 
 Sub Render(g, dt)
     Dim font, text, fmtDt
-
     g.Clear Color.Black
     playerRect.DrawFilled g, Color.Cyan
     playerRect.DrawOutline g, 3
@@ -112,27 +113,174 @@ End Sub
 
 ### Available APIs
 
-#### Window Management
-- `SetWindowSize(width, height)`: Set the game window size
+> **Note**: Shorthands for writing type annotations: `%` = `As Integer`, `!` = `As Single`, `$` = `As String`. Parameters without type annotations are `Object` type.
 
-#### Input Handling
-- `IsKeyDown(key)`: Check if a key was just pressed
-- `IsKeyHeld(key)`: Check if a key is currently held
-- `IsKeyUp(key)`: Check if a key was just released
-- `IsMouseDown(button)`: Check if a mouse button was just pressed
-- `IsMouseHeld(button)`: Check if a mouse button is currently held
-- `IsMouseUp(button)`: Check if a mouse button was just released
+#### Engine API (AppMain.Instance)
+- `SetWindowSize(width%, height%)`: Set the game window size
 - `GetMousePosition()`: Get current mouse position as Vec2i
+- `IsKeyDown(key As Keys)`: Check if a key was just pressed; returns `Boolean`
+- `IsKeyHeld(key As Keys)`: Check if a key is currently held; returns `Boolean`
+- `IsKeyUp(key As Keys)`: Check if a key was just released; returns `Boolean`
+- `IsMouseDown(button As MouseButtons)`: Check if a mouse button was just pressed; returns `Boolean`
+- `IsMouseHeld(button As MouseButtons)`: Check if a mouse button is currently held; returns `Boolean`
+- `IsMouseUp(button As MouseButtons)`: Check if a mouse button was just released; returns `Boolean`
 
-#### Assets
-- `SoundAsset.Create(name)`: Create a sound asset
-- `MusicAsset.Create(name)`: Create a music asset
-- `ImageAsset.Create(name)`: Create an image asset
-- `FontAsset.Create(name)`: Create a font asset
+#### Asset Classes
+
+##### `SoundAsset` - WAV Audio Asset
+- `SoundAsset.Create(name$)`: Create a sound asset from sounds/name.wav
+- `.Play()`: Play the sound
+- `.Stop()`: Stop the sound playback
+
+##### `MusicAsset` - MP3 Audio Asset
+- `MusicAsset.Create(name$)`: Create a music asset from music/name.mp3
+- `.Play()`: Play the music
+- `.Stop()`: Stop the music playback
+- `.SetVolume(volume)`: Set volume level (0.0 to 1.0)
+
+##### `ImageAsset` - PNG Image Asset
+- `ImageAsset.Create(name$)`: Create an image asset from images/name.png
+- `.Draw(g As Graphics, x%, y%)`: Draw the image at position (x, y) on the Graphics object
+- `.Width`: Get the image width (read-only property)
+- `.Height`: Get the image height (read-only property)
+
+##### `FontAsset` - TrueType Font Asset
+- `FontAsset.Create(name$)`: Create a font asset from fonts/name.ttf (or use system font if not found)
+- `.DrawText(g As Graphics, text$, x%, y%, [color As Color], [size%])`: Draw text at position (x, y) with optional color and size
 
 #### Geometric Types
-- `Vec2i`/`Vec2f`: 2D integer/floating-point vectors
-- `Recti`/`Rectf`: 2D integer/floating-point rectangles
+
+##### `Vec2i` - Integer 2D Vector
+- `Vec2i.Create(x%, y%)`: Create a new Vec2i instance
+- `Vec2i.CreateZero()`: Create a zero vector (0, 0)
+- `Vec2i.CreateOne()`: Create a unit vector (1, 1)
+- `Vec2i.CreateUnitX()`: Create unit X vector (1, 0)
+- `Vec2i.CreateUnitY()`: Create unit Y vector (0, 1)
+- `.X`, `.Y`: Coordinate properties
+- `.Add(other As Vec2i)`: Add another vector and return new vector
+- `.Subtract(other As Vec2i)`: Subtract another vector and return new vector
+- `.Multiply(scalar%)`: Multiply by scalar and return new vector
+- `.Divide(scalar%)`: Divide by scalar and return new vector
+- `.Dot(other As Vec2i)`: Calculate dot product with another vector
+- `.LengthSquared()`: Get squared length of the vector
+- `.Length()`: Get length of the vector
+- `.Normalize()`: Get normalized vector (unit vector)
+- `.DistanceTo(other As Vec2i)`: Calculate distance to another vector
+- `.DistanceSquaredTo(other As Vec2i)`: Calculate squared distance to another vector
+- `.ToString()`: Get string representation
+
+##### `Vec2f` - Float 2D Vector
+- `Vec2f.Create(x!, y!)`: Create a new Vec2f instance
+- `Vec2f.CreateZero()`: Create a zero vector (0.0, 0.0)
+- `Vec2f.CreateOne()`: Create a unit vector (1.0, 1.0)
+- `Vec2f.CreateUnitX()`: Create unit X vector (1.0, 0.0)
+- `Vec2f.CreateUnitY()`: Create unit Y vector (0.0, 1.0)
+- `.X`, `.Y`: Coordinate properties
+- `.Add(other As Vec2f)`: Add another vector and return new vector
+- `.Subtract(other As Vec2f)`: Subtract another vector and return new vector
+- `.Multiply(scalar!)`: Multiply by scalar and return new vector
+- `.Divide(scalar!)`: Divide by scalar and return new vector
+- `.Dot(other As Vec2f)`: Calculate dot product with another vector
+- `.Cross(other As Vec2f)`: Calculate cross product with another vector
+- `.LengthSquared()`: Get squared length of the vector
+- `.Length()`: Get length of the vector
+- `.Normalize()`: Get normalized vector (unit vector)
+- `.DistanceTo(other As Vec2f)`: Calculate distance to another vector
+- `.DistanceSquaredTo(other As Vec2f)`: Calculate squared distance to another vector
+- `.Angle()`: Get angle of the vector
+- `.AngleTo(other As Vec2f)`: Get angle to another vector
+- `.Rotate(angle!)`: Rotate vector by angle in radians
+- `.ToString()`: Get string representation
+
+##### `Recti` - Integer Rectangle
+- `Recti.Create(x%, y%, width%, height%)`: Create a new Recti instance
+- `Recti.CreateFromPoints(topLeft As Vec2i, bottomRight As Vec2i)`: Create from top-left and bottom-right points
+- `Recti.CreateFromCenter(center As Vec2i, width%, height%)`: Create from center point and dimensions
+- `.X`, `.Y`, `.Width`, `.Height`: Rectangle properties
+- `.Right`, `.Bottom`: Read-only properties for right and bottom edges
+- `.CenterX`, `.CenterY`: Read-only properties for center coordinates
+- `.Center`: Read-only property for center as Vec2i
+- `.Offset(dx%, dy%)`: Move rectangle by offset values
+- `.Offset(vec As Vec2i)`: Move rectangle by Vec2i offset
+- `.Inflate(amount%)`: Expand rectangle by amount in all directions
+- `.Inflate(horizontal%, vertical%)`: Expand rectangle by different horizontal/vertical amounts
+- `.Contains(x%, y%)`: Check if point is inside rectangle
+- `.Contains(point As Vec2i)`: Check if Vec2i point is inside rectangle
+- `.Contains(rect As Recti)`: Check if another rectangle is completely inside
+- `.Intersects(other As Recti)`: Check if rectangle intersects with another
+- `.Intersection(other As Recti)`: Get intersection rectangle with another
+- `.Union(other As Recti)`: Get union rectangle with another
+- `.DrawOutline(g As Graphics, thickness%, [color As Color])`: Draw rectangle outline on Graphics object
+- `.DrawFilled(g As Graphics, [color As Color])`: Draw filled rectangle on Graphics object
+
+##### `Rectf` - Float Rectangle
+- `Rectf.Create(x!, y!, width!, height!)`: Create a new Rectf instance
+- `Rectf.CreateFromPoints(topLeft As Vec2f, bottomRight As Vec2f)`: Create from top-left and bottom-right points
+- `Rectf.CreateFromCenter(center As Vec2f, width!, height!)`: Create from center point and dimensions
+- `.X`, `.Y`, `.Width`, `.Height`: Rectangle properties
+- `.Right`, `.Bottom`: Read-only properties for right and bottom edges
+- `.CenterX`, `.CenterY`: Read-only properties for center coordinates
+- `.Center`: Read-only property for center as Vec2f
+- `.Offset(dx!, dy!)`: Move rectangle by offset values
+- `.Offset(vec As Vec2f)`: Move rectangle by Vec2f offset
+- `.Inflate(amount!)`: Expand rectangle by amount in all directions
+- `.Inflate(horizontal!, vertical!)`: Expand rectangle by different horizontal/vertical amounts
+- `.Contains(x!, y!)`: Check if point is inside rectangle
+- `.Contains(point As Vec2f)`: Check if Vec2f point is inside rectangle
+- `.Contains(rect As Rectf)`: Check if another rectangle is completely inside
+- `.Intersects(other As Rectf)`: Check if rectangle intersects with another
+- `.Intersection(other As Rectf)`: Get intersection rectangle with another
+- `.Union(other As Rectf)`: Get union rectangle with another
+- `.DrawOutline(g As Graphics, thickness%, [color As Color])`: Draw rectangle outline on Graphics object
+- `.DrawFilled(g As Graphics, [color As Color])`: Draw filled rectangle on Graphics object
+
+#### Native .NET Framework Types Exposed
+
+##### `Keys` (from namespace System.Windows.Forms)
+Enum containing all keyboard keys that can be used with input functions.
+
+##### `MouseButtons` (from namespace System.Windows.Forms)
+Enum containing mouse buttons (Left, Right, Middle) for mouse input functions.
+
+##### `Color` (from namespace System.Drawing)
+Provides predefined colors (Color.Red, Color.Blue, etc.) and color creation methods.
+- Predefined colors: Black, White, Red, Green, Blue, Cyan, Magenta, Yellow, etc.
+- Methods: `Color.FromArgb(r%, g%, b%)`, `Color.FromArgb(a%, r%, g%, b%)`
+
+##### `FontStyle` (from namespace System.Drawing)
+Font styles for text rendering (Regular, Bold, Italic, Underline, Strikeout).
+
+##### `Strings` (from namespace Microsoft.VisualBasic)
+VB-specific string manipulation functions:
+- `Strings.Format(expression$, format$)`: Format a value with specified format
+- `Strings.Len(string$)`: Get length of string
+- And many more string functions
+
+##### `Convert` (from namespace System.Convert)
+Conversion functions between different data types:
+- `Convert.ToInt32(value)`: Converts an object to 32-bit integer
+- `Convert.ToSingle(value)`: Converts an object to single precision float
+- `Convert.ToDouble(value)`: Converts an object to double precision float
+- `Convert.ToString(value)`: Converts an object to string
+- And many more conversion methods
+
+##### `VBMath` (from namespace Microsoft.VisualBasic)
+Legacy mathematical functions, especially for random number generation:
+- `VBMath.Rnd()`: Generate random number
+- `VBMath.Randomize()`: Initialize random number generator
+
+##### `MathF` (from namespace System.Math, used for floating-point math)
+Mathematical functions for floating-point numbers:
+- `MathF.Sin(value!)`: Sine function
+- `MathF.Cos(value!)`: Cosine function
+- `MathF.Tan(value!)`: Tangent function
+- `MathF.Sqrt(value!)`: Square root
+- `MathF.Abs(value!)`: Absolute value
+- `MathF.Pow(base!, exponent!)`: Power function
+- `MathF.Log(value!)`: Natural logarithm
+- `MathF.Max(val1!, val2!)`: Maximum of two values
+- `MathF.Min(val1!, val2!)`: Minimum of two values
+- And many more mathematical functions
 
 ## Dependencies
 

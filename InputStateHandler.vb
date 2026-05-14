@@ -38,12 +38,8 @@ Public NotInheritable Class InputStateHandler
         Dim currentPressed As Boolean = False
         Dim previousPressed As Boolean = False
         
-        If _currentKeyState.TryGetValue(key, currentPressed) AndAlso currentPressed Then
-            If Not _previousKeyState.TryGetValue(key, previousPressed) OrElse Not previousPressed Then
-                Return True
-            End If
-        End If
-        Return False
+        Return (_currentKeyState.TryGetValue(key, currentPressed) AndAlso currentPressed) AndAlso
+            (Not _previousKeyState.TryGetValue(key, previousPressed) OrElse Not previousPressed)
     End Function
     
     Public Function IsKeyHeld(key As Keys) As Boolean
@@ -55,24 +51,16 @@ Public NotInheritable Class InputStateHandler
         Dim currentPressed As Boolean = False
         Dim previousPressed As Boolean = False
         
-        If _currentKeyState.TryGetValue(key, currentPressed) AndAlso Not currentPressed Then
-            If _previousKeyState.TryGetValue(key, previousPressed) AndAlso previousPressed Then
-                Return True
-            End If
-        End If
-        Return False
+        Return (_currentKeyState.TryGetValue(key, currentPressed) AndAlso Not currentPressed) AndAlso
+            (_previousKeyState.TryGetValue(key, previousPressed) AndAlso previousPressed)
     End Function
     
     Public Function IsMouseDown(button As MouseButtons) As Boolean
         Dim currentPressed As Boolean = False
         Dim previousPressed As Boolean = False
         
-        If _currentMouseState.TryGetValue(button, currentPressed) AndAlso currentPressed Then
-            If Not _previousMouseState.TryGetValue(button, previousPressed) OrElse Not previousPressed Then
-                Return True
-            End If
-        End If
-        Return False
+        Return (_currentMouseState.TryGetValue(button, currentPressed) AndAlso currentPressed) AndAlso
+            (Not _previousMouseState.TryGetValue(button, previousPressed) OrElse Not previousPressed)
     End Function
     
     Public Function IsMouseHeld(button As MouseButtons) As Boolean
@@ -84,12 +72,8 @@ Public NotInheritable Class InputStateHandler
         Dim currentPressed As Boolean = False
         Dim previousPressed As Boolean = False
         
-        If _currentMouseState.TryGetValue(button, currentPressed) AndAlso Not currentPressed Then
-            If _previousMouseState.TryGetValue(button, previousPressed) AndAlso previousPressed Then
-                Return True
-            End If
-        End If
-        Return False
+        Return (_currentMouseState.TryGetValue(button, currentPressed) AndAlso Not currentPressed) AndAlso
+            (_previousMouseState.TryGetValue(button, previousPressed) AndAlso previousPressed)
     End Function
     
     Public Sub ResetStates()

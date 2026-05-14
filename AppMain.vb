@@ -17,6 +17,8 @@ Public NotInheritable Class AppMain
     Private ReadOnly _inputStateHandler As New InputStateHandler
     Private _gameLoop As System.Windows.Forms.Timer = Nothing
     Private _graphics As Graphics = Nothing
+    Private _lastFrameTime As Long = 0
+    Private _deltaTime As Single = 0.0F
 
     Private Sub New()
         InitializeComponent()
@@ -53,27 +55,30 @@ Public NotInheritable Class AppMain
     End Sub
 
     Private Const DEFAULT_GAME_SCRIPT As String = "Option Explicit
-Dim playerRect, playerSpeed, font, text
+Dim playerRect, playerSpeed
 
 Sub Initialize()
     AppMain.Instance.SetWindowSize 800, 600
     playerRect = Recti.CreateFromCenter(Vec2i.Create(400, 300), 50, 50)
-    playerSpeed = 5
+    playerSpeed = 200  ' Unit: pixels per second
 End Sub
 
-Sub Update()
+Sub Update(dt)
+    Dim actualSpeed
+    actualSpeed = Convert.ToInt32(playerSpeed * dt)
+    
     With AppMain.Instance
         If .IsKeyHeld(Keys.Left) Or .IsKeyHeld(Keys.A) Then
-            playerRect.Offset -playerSpeed, 0
+            playerRect.Offset -actualSpeed, 0
         End If
         If .IsKeyHeld(Keys.Right) Or .IsKeyHeld(Keys.D) Then
-            playerRect.Offset playerSpeed, 0
+            playerRect.Offset actualSpeed, 0
         End If
         If .IsKeyHeld(Keys.Up) Or .IsKeyHeld(Keys.W) Then
-            playerRect.Offset 0, -playerSpeed
+            playerRect.Offset 0, -actualSpeed
         End If
         If .IsKeyHeld(Keys.Down) Or .IsKeyHeld(Keys.S) Then
-            playerRect.Offset 0, playerSpeed
+            playerRect.Offset 0, actualSpeed
         End If
     End With
     With playerRect
@@ -84,13 +89,17 @@ Sub Update()
     End With
 End Sub
 
-Sub Render(g)
+Sub Render(g, dt)
+    Dim font, text, fmtDt
     g.Clear Color.Black
     playerRect.DrawFilled g, Color.Cyan
     playerRect.DrawOutline g, 3
     Set font = FontAsset.Create(""Arial"")
     text = ""Welcome! Use W,A,S,D or Arrow Keys to move around.""
     font.DrawText g, text, 10, 10, Color.Cyan
+    fmtDt = Strings.Format(dt * 1000, ""0.00"")
+    text = ""Speed: "" & playerSpeed & "" px/s; Delta Time: "" & fmtDt & "" ms""
+    font.DrawText g, text, 10, 30, Color.Cyan
 End Sub
 "
 
@@ -133,7 +142,7 @@ End Sub
             GetType(Vec2i), GetType(Vec2f), GetType(Recti), GetType(Rectf), GetType(MusicAsset),
             GetType(ImageAsset), GetType(SoundAsset), GetType(FontAsset), GetType(AppMain),
             GetType(Keys), GetType(MouseButtons), GetType(Color), GetType(FontStyle),
-            GetType(Brushes), GetType(String), GetType(MathF)
+            GetType(Strings), GetType(Convert), GetType(VBMath), GetType(MathF)
         )
         _scriptEngine.AddHostObject("App", Me)
     End Sub
@@ -159,8 +168,17 @@ End Sub
     End Sub
 
     Private Sub GameLoop_Tick(sender As Object, e As EventArgs)
+        ' Calculate delta time in seconds
+        Dim currentTime As Long = Date.Now.Ticks \ TimeSpan.TicksPerMillisecond
+        If _lastFrameTime = 0 Then
+            _deltaTime = 0.016F ' Assume 60fps on first frame
+        Else
+            _deltaTime = (currentTime - _lastFrameTime) / 1000.0F
+        End If
+        _lastFrameTime = currentTime
+
         _inputStateHandler.UpdatePreviousStates()
-        _scriptEngine.Invoke("Update")
+        _scriptEngine.Invoke("Update", _deltaTime)
         Invalidate()
     End Sub
 
@@ -193,7 +211,7 @@ End Sub
     Protected Overrides Sub OnPaint(e As PaintEventArgs)
         MyBase.OnPaint(e)
         _graphics = e.Graphics
-        _scriptEngine.Invoke("Render", _graphics)
+        _scriptEngine.Invoke("Render", _graphics, _deltaTime)
     End Sub
 
     <STAThread()>

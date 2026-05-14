@@ -55,33 +55,36 @@ Upon first run, the engine creates default asset directories (`sounds`, `images`
 Your game logic goes in `gamemain.vbs` with three main functions:
 
 - `Initialize()`: Called once at startup
-- `Update()`: Called every frame for game logic
-- `Render(g)`: Called every frame for drawing
+- `Update(dt)`: Called every frame for game logic, where `dt` is delta time in seconds since last frame
+- `Render(g, dt)`: Called every frame for drawing, where `g` is the Graphics object and `dt` is delta time in seconds since last frame
 
 ### Example Script
 ```vbscript
 Option Explicit
-Dim playerRect, playerSpeed, font, text
+Dim playerRect, playerSpeed
 
 Sub Initialize()
     AppMain.Instance.SetWindowSize 800, 600
     playerRect = Recti.CreateFromCenter(Vec2i.Create(400, 300), 50, 50)
-    playerSpeed = 5
+    playerSpeed = 200  ' Unit: pixels per second
 End Sub
 
-Sub Update()
+Sub Update(dt)
+    Dim actualSpeed
+    actualSpeed = Convert.ToInt32(playerSpeed * dt)
+    
     With AppMain.Instance
         If .IsKeyHeld(Keys.Left) Or .IsKeyHeld(Keys.A) Then
-            playerRect.Offset -playerSpeed, 0
+            playerRect.Offset -actualSpeed, 0
         End If
         If .IsKeyHeld(Keys.Right) Or .IsKeyHeld(Keys.D) Then
-            playerRect.Offset playerSpeed, 0
+            playerRect.Offset actualSpeed, 0
         End If
         If .IsKeyHeld(Keys.Up) Or .IsKeyHeld(Keys.W) Then
-            playerRect.Offset 0, -playerSpeed
+            playerRect.Offset 0, -actualSpeed
         End If
         If .IsKeyHeld(Keys.Down) Or .IsKeyHeld(Keys.S) Then
-            playerRect.Offset 0, playerSpeed
+            playerRect.Offset 0, actualSpeed
         End If
     End With
     With playerRect
@@ -92,13 +95,18 @@ Sub Update()
     End With
 End Sub
 
-Sub Render(g)
+Sub Render(g, dt)
+    Dim font, text, fmtDt
+
     g.Clear Color.Black
     playerRect.DrawFilled g, Color.Cyan
     playerRect.DrawOutline g, 3
     Set font = FontAsset.Create("Arial")
     text = "Welcome! Use W,A,S,D or Arrow Keys to move around."
     font.DrawText g, text, 10, 10, Color.Cyan
+    fmtDt = Strings.Format(dt * 1000, "0.00")
+    text = "Speed: " & playerSpeed & " px/s; Delta Time: " & fmtDt & " ms"
+    font.DrawText g, text, 10, 30, Color.Cyan
 End Sub
 ```
 

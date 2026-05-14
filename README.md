@@ -1,11 +1,30 @@
 # vbs-revive: VBScript Game Engine Created With VB.NET WinForms
 
+> **Important Note About VBScript Deprecation**
+> 
+> Microsoft has officially deprecated VBScript and will remove it from future versions of Windows, which is why this project exists (see [Why VBScript?](#why-vbscript) section). 
+> 
+> The project's executable (`vbs-revive.exe`) currently relies on the system's `vbscript.dll` to run game scripts. If you're concerned about long-term compatibility, you can back up the following files from your current Windows installation (Windows 10/11):
+> 
+> - `C:\Windows\System32\vbscript.dll` (64-bit)
+> - `C:\Windows\SysWOW64\vbscript.dll` (32-bit)
+> - Registry key: `HKEY_CLASSES_ROOT\VBScript`
+
 ![](screenshot.png)
 
 ## Description
 `vbs-revive` is a lightweight game engine that allows developers to create games using VBScript as the scripting language. Despite Microsoft's official deprecation of VBScript, this engine remains a viable option for game development to this day.
 
 The game engine, built with VB.NET and Windows Forms, not only provides a simple interface for rapid game prototyping, as well as for learning game development concepts, but also leverages the power of VBScript to create dynamic and interactive games, while remaining easy to use and extend.
+
+## Why VBScript?
+Yes, Microsoft is deprecating VBScript - that's exactly why this project exists. VBScript was once the easiest way for beginners to automate Windows and make simple games. _It required no compilers, no complex toolchains - just Notepad and a double-click. But as Microsoft moves on, that simplicity risks being lost forever._
+
+`vbs-revive` is not a practical choice for production games. It's a preservation project, a hobbyist's playground, a mighty proof that even a "dead" language can still power a game loop, handle input, play sounds, and bring a little joy to those who grew up with it.
+
+**Switching to Lua or JavaScript would make the engine more "viable," but it would also defeat the point.** Therefore, this project isn't about the best tool for the job. It's about keeping an old friend alive a little longer.
+
+_**They said VBScript was deprecated, and they said it wouldn't run any longer, but the game engine has VBScript anyway.**_
 
 ## Features
 

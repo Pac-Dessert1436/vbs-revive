@@ -147,6 +147,12 @@ End Sub
         _scriptEngine.AddHostObject("App", Me)
     End Sub
 
+    Private Sub StopEngineWithMessage(message As String)
+        MessageBox.Show(message, "SCRIPT ERROR - Engine will be stopped",
+            MessageBoxButtons.OK, MessageBoxIcon.Error)
+        Close()
+    End Sub
+
     Private Sub LoadGameScript()
         Try
             If File.Exists("gamemain.vbs") Then
@@ -155,7 +161,7 @@ End Sub
                 _scriptEngine.Invoke("Initialize")
             End If
         Catch ex As Exception
-            MessageBox.Show($"Error loading script: {ex.Message}", "Script Error", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            StopEngineWithMessage($"Error loading script: {ex.Message}")
         End Try
     End Sub
 
@@ -178,7 +184,11 @@ End Sub
         _lastFrameTime = currentTime
 
         _inputStateHandler.UpdatePreviousStates()
-        _scriptEngine.Invoke("Update", _deltaTime)
+        Try
+            _scriptEngine.Invoke("Update", _deltaTime)
+        Catch ex As Exception
+            StopEngineWithMessage($"Error in Update call: {ex.Message}")
+        End Try
         Invalidate()
     End Sub
 
@@ -211,7 +221,11 @@ End Sub
     Protected Overrides Sub OnPaint(e As PaintEventArgs)
         MyBase.OnPaint(e)
         _graphics = e.Graphics
-        _scriptEngine.Invoke("Render", _graphics, _deltaTime)
+        Try
+            _scriptEngine.Invoke("Render", _graphics, _deltaTime)
+        Catch ex As Exception
+            StopEngineWithMessage($"Error in Render call: {ex.Message}")
+        End Try
     End Sub
 
     <STAThread()>

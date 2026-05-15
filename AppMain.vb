@@ -138,7 +138,8 @@ End Sub
             GetType(Vec2i), GetType(Vec2f), GetType(Recti), GetType(Rectf), GetType(MusicAsset),
             GetType(ImageAsset), GetType(SoundAsset), GetType(FontAsset), GetType(AppMain),
             GetType(Keys), GetType(MouseButtons), GetType(Color), GetType(FontStyle),
-            GetType(Strings), GetType(Convert), GetType(VBMath), GetType(MathF)
+            GetType(Strings), GetType(Convert), GetType(VBMath), GetType(MathF),
+            GetType(Collections)
         )
         _scriptEngine.AddHostObject("App", Me)
     End Sub

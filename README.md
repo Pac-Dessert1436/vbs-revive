@@ -17,6 +17,8 @@
 
 The game engine, built with VB.NET and Windows Forms, not only provides a simple interface for rapid game prototyping, as well as for learning game development concepts, but also leverages the power of VBScript to create dynamic and interactive games, while remaining easy to use and extend.
 
+> **v1.0.1 Stable Release**: Added music/sound looping support, along with LINQ-like functionality for arrays and collections. For more details, see [Available APIs](#available-apis).
+
 ## Why VBScript?
 Yes, Microsoft is deprecating VBScript - that's exactly why this project exists. VBScript was once the easiest way for beginners to automate Windows and make simple games. _It required no compilers, no complex toolchains - just Notepad and a double-click. But as Microsoft moves on, that simplicity risks being lost forever._
 
@@ -35,6 +37,8 @@ _**They said VBScript was deprecated, and they said it wouldn't run any longer, 
 - **Mathematical utilities**: Vector and rectangle classes for game geometry
 - **Audio playback**: Support for sound effects and background music
 - **Cross-platform dependencies**: Uses .NET 10.0 for modern compatibility
+- **New Collections API**: Provides a rich set of collection classes for handling object arrays/hashsets, `ArrayList` and `Hashtable` with LINQ support (see [Collections Module](#collections-module-linq-like-functionality-new-in-101) section for details)
+- **Extensibility**: Easily add custom game components and features
 
 ## Architecture Overview
 
@@ -149,11 +153,13 @@ End Sub
 ##### `SoundAsset` - WAV Audio Asset
 - `SoundAsset.Create(name$)`: Create a sound asset from sounds/name.wav
 - `.Play()`: Play the sound
+- `.PlayLooping()`: Play the sound in a continuous loop (available in 1.0.1)
 - `.Stop()`: Stop the sound playback
 
 ##### `MusicAsset` - MP3 Audio Asset
 - `MusicAsset.Create(name$)`: Create a music asset from music/name.mp3
 - `.Play()`: Play the music
+- `.PlayLooping()`: Play the music in a continuous loop (available in 1.0.1)
 - `.Stop()`: Stop the music playback
 - `.SetVolume(volume)`: Set volume level (0.0 to 1.0)
 
@@ -252,6 +258,60 @@ End Sub
 - `.Union(other As Rectf)`: Get union rectangle with another
 - `.DrawOutline(g As Graphics, thickness%, [color As Color])`: Draw rectangle outline on Graphics object
 - `.DrawFilled(g As Graphics, [color As Color])`: Draw filled rectangle on Graphics object
+
+#### Collections Module (LINQ-like functionality, NEW in 1.0.1)
+
+The `Collections` module provides LINQ-like methods for working with arrays and collections in VBScript. All methods work with VBScript arrays and .NET collections. _Unlike the `AddressOf` keyword in VB.NET, we use **the built-in `GetRef` function** in VBScript with the function name, to transform functions into first-class objects._
+
+**Creation Methods:**
+- `Collections.ArrayOf(ParamArray items)`: Create an array from parameters
+- `Collections.CreateArrayList([capacity%])`: Create an empty ArrayList (optional initial capacity)
+- `Collections.CreateHashSet()`: Create an empty HashSet
+- `Collections.CreateHashtable()`: Create an empty Hashtable
+
+**Query Methods:**
+- `Collections.Where(source, predicate)`: Filter items using a predicate function. Returns ArrayList.
+- `Collections.Select(source, selector)`: Transform items using a selector function. Returns ArrayList.
+- `Collections.First(source, [predicate])`: Get first matching item, or first item if no predicate.
+- `Collections.Last(source, [predicate])`: Get last matching item, or last item if no predicate.
+- `Collections.CountItems(source, [predicate])`: Count items, optionally filtered by predicate.
+- `Collections.Any(source, [predicate])`: Check if any item exists (or matches predicate). Returns Boolean.
+- `Collections.All(source, predicate)`: Check if all items match predicate. Returns Boolean.
+- `Collections.Contains(source, value)`: Check if collection contains specified value. Returns Boolean.
+
+**Manipulation Methods:**
+- `Collections.Sort(source)`: Sort an ArrayList in place. Returns the sorted ArrayList.
+- `Collections.SortWithComparer(source, comparer)`: Sort ArrayList with custom comparison function. Returns sorted ArrayList.
+- `Collections.Reverse(source)`: Reverse an ArrayList in place. Returns the reversed ArrayList.
+- `Collections.Take(source, count%)`: Take first N items from collection. Returns ArrayList.
+- `Collections.Skip(source, count%)`: Skip first N items and return the rest. Returns ArrayList.
+
+**Conversion Methods:**
+- `Collections.ToArray(source)`: Convert collection to VBScript Array.
+- `Collections.ToArrayList(source)`: Convert collection to ArrayList.
+
+**Usage Example:**
+```vbscript
+' Create an array of enemies
+enemies = Collections.ArrayOf( _
+    Array("Goblin", 10), _
+    Array("Orc", 25), _
+    Array("Dragon", 100) _
+)
+' Filter strong enemies (HP > 20)
+strongEnemies = Collections.Where(enemies, GetRef("FilterStrong"))
+' Get enemy names only
+names = Collections.Select(enemies, GetRef("GetName"))
+
+' Helper functions
+Function FilterStrong(enemy)
+    FilterStrong = (enemy(1) > 20)
+End Function
+
+Function GetName(enemy)
+    GetName = enemy(0)
+End Function
+```
 
 #### Native .NET Framework Types Exposed
 

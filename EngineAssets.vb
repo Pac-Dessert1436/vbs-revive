@@ -6,6 +6,7 @@ Public NotInheritable Class SoundAsset
     Private ReadOnly _fileName As String
     Private _waveOut As WaveOutEvent = Nothing
     Private _audioFile As AudioFileReader = Nothing
+    Private _isLooping As Boolean = False
 
     Private Sub New(assetName As String)
         _fileName = $"sounds/{assetName}.wav"
@@ -17,17 +18,44 @@ Public NotInheritable Class SoundAsset
 
     Public Sub Play()
         If File.Exists(_fileName) Then
+            StopCurrentPlayback()
             _audioFile = New AudioFileReader(_fileName)
             _waveOut = New WaveOutEvent()
+            AddHandler _waveOut.PlaybackStopped, AddressOf OnPlaybackStopped
             _waveOut.Init(_audioFile)
             _waveOut.Play()
         End If
     End Sub
 
+    Public Sub PlayLooping()
+        _isLooping = True
+        Play()
+    End Sub
+
+    Private Sub OnPlaybackStopped(sender As Object, e As StoppedEventArgs)
+        If _isLooping Then
+            ' Restart the audio file from the beginning for looping
+            If File.Exists(_fileName) Then
+                _audioFile = New AudioFileReader(_fileName)
+                _waveOut = New WaveOutEvent()
+                AddHandler _waveOut.PlaybackStopped, AddressOf OnPlaybackStopped
+                _waveOut.Init(_audioFile)
+                _waveOut.Play()
+            End If
+        End If
+    End Sub
+
     Public Sub [Stop]()
+        _isLooping = False
+        StopCurrentPlayback()
+    End Sub
+
+    Private Sub StopCurrentPlayback()
         _waveOut?.Stop()
         _audioFile?.Dispose()
         _waveOut?.Dispose()
+        _waveOut = Nothing
+        _audioFile = Nothing
     End Sub
 End Class
 
@@ -44,19 +72,48 @@ Public NotInheritable Class MusicAsset
         Return New MusicAsset(assetName)
     End Function
 
+    Private _isLooping As Boolean = False
+
     Public Sub Play()
         If File.Exists(_fileName) Then
+            StopCurrentPlayback()
             _audioFile = New AudioFileReader(_fileName)
             _waveOut = New WaveOutEvent()
+            AddHandler _waveOut.PlaybackStopped, AddressOf OnPlaybackStopped
             _waveOut.Init(_audioFile)
             _waveOut.Play()
         End If
     End Sub
 
+    Public Sub PlayLooping()
+        _isLooping = True
+        Play()
+    End Sub
+
+    Private Sub OnPlaybackStopped(sender As Object, e As StoppedEventArgs)
+        If _isLooping Then
+            ' Restart the audio file from the beginning for looping
+            If File.Exists(_fileName) Then
+                _audioFile = New AudioFileReader(_fileName)
+                _waveOut = New WaveOutEvent()
+                AddHandler _waveOut.PlaybackStopped, AddressOf OnPlaybackStopped
+                _waveOut.Init(_audioFile)
+                _waveOut.Play()
+            End If
+        End If
+    End Sub
+
     Public Sub [Stop]()
+        _isLooping = False
+        StopCurrentPlayback()
+    End Sub
+
+    Private Sub StopCurrentPlayback()
         _waveOut?.Stop()
         _audioFile?.Dispose()
         _waveOut?.Dispose()
+        _waveOut = Nothing
+        _audioFile = Nothing
     End Sub
 
     Public Sub SetVolume(volume As Single)
